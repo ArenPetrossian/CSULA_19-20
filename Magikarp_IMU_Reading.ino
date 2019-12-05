@@ -34,7 +34,7 @@ void Initialize_IMU(){
 }
 
 
-double IMU_Data_Values(){
+void IMU_Data_Values(){
 //    Wire.beginTransmission(0x28); //don't need for now but will need when we have > 1 sensor
     float x_angle, y_angle, z_angle;
     imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
@@ -46,5 +46,4 @@ Serial.print(' ');
 Serial.print(y_angle);
 Serial.print(' ');
 Serial.println(z_angle);
-  return 0;
 }
