@@ -38,9 +38,9 @@ void IMU_Data_Values(){
 //    Wire.beginTransmission(0x28); //don't need for now but will need when we have > 1 sensor
     float x_angle, y_angle, z_angle;
     imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-    y_angle = euler.z();  // our y and z angles are switched for the 19-20 year
-    z_angle = euler.y();  // ..
-    x_angle = euler.x();
+    x_angle = euler.x();    // our X is yaw
+    y_angle = euler.z();    // our Y is roll
+    z_angle = euler.y();    // our Z is pitch
 Serial.print(x_angle);
 Serial.print(' ');
 Serial.print(y_angle);
