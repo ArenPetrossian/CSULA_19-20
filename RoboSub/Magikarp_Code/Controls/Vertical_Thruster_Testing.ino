@@ -1,15 +1,11 @@
 /* Robosub 2019-2020 Vertical Thruster Testing
    
-   Feature: IMU for Y & Z angles only
-            Output for Vertical Thrusters only
-
-   Revision History: 
-    Update (11/26/19):
-      Barometer kP value updated to 400
-
+   Current Revision 11 14 19:
+      Only Vertical Thrusters React
+      Barometer kP updated to 400
+      
    All values with "//****"  can be personalized
 */
-
 
 
 //All librarys and IMU setup
@@ -44,8 +40,8 @@ int back_right_thruster_pin = 7;            //****
 
 //Start all PIDs and set k values**
 double barometer_input, barometer_output, barometer_setpoint;
-double Y_angle_input, Y_angle_output, Y_angle_setpoint, Y_angle_RealSetpoint;
-double Z_angle_input, Z_angle_output, Z_angle_setpoint, Z_angle_RealSetpoint;
+double Y_angle_input, Y_angle_output, Y_angle_setpoint;
+double Z_angle_input, Z_angle_output, Z_angle_setpoint;
 
 double barometer_kP = 400;             //****
 double barometer_kI = 0;              //****
@@ -59,9 +55,9 @@ double Z_angle_kD = 3.5;              //****
 
 PID barometer_PID  (&barometer_input, &barometer_output, &barometer_setpoint,
                    barometer_kP, barometer_kI, barometer_kD, DIRECT);
-PID Y_angle_PID    (&Y_angle_input, &Y_angle_output, &Y_angle_RealSetpoint,
+PID Y_angle_PID    (&Y_angle_input, &Y_angle_output, &Y_angle_setpoint,
                    Y_angle_kP, Y_angle_kI, Y_angle_kD, DIRECT);
-PID Z_angle_PID    (&Z_angle_input, &Z_angle_output, &Z_angle_RealSetpoint,
+PID Z_angle_PID    (&Z_angle_input, &Z_angle_output, &Z_angle_setpoint,
                    Z_angle_kP, Z_angle_kI, Z_angle_kD, DIRECT);
 
 
@@ -84,7 +80,7 @@ void setup(){
   Z_angle_PID.SetOutputLimits(-100.00, 100.00);
   barometer_PID.SetOutputLimits(-300.00, 300.00);     //assuming max power is +-300
   
-  barometer_setpoint = 0.15;          //****        changes based on cv and nav
+  barometer_setpoint = 0.15;          //****
   Y_angle_setpoint = 0;               //****
   Z_angle_setpoint = 0;               //****
   delay(6000);                        //Thrusters need time to turn on or they dont spin
@@ -103,7 +99,6 @@ void loop(){
 
 //Turns IMU data collecting on
 void InitializeIMU(){
-  //Wire.begin();       //Can use this if dealing with only 1 sensor
   Wire.beginTransmission(0x28);
   if(!bno.begin()) {
     /* There was a problem detecting the BNO055 ... check your connections */
@@ -117,15 +112,14 @@ void InitializeIMU(){
 
 //Turns Barometer data collecting on
 void InitializeBarometer(){
-  //Wire.begin();       //Can use this if dealing with only 1 sensor
   Wire.beginTransmission(0x76);
   while (!sensor.init()) {
     Serial.println("Initilization failed");
     delay(2000);
   }
   sensor.setModel(MS5837::MS5837_30BA);
-  sensor.setFluidDensity(997);      //(air ~ 1.23, freshwater ~ 997, seawater ~ 1029)
-}                                   //air is not accurate
+  sensor.setFluidDensity(997);      //(freshwater ~ 997, seawater ~ 1029)
+}
 
 
 
@@ -142,22 +136,24 @@ void IMU_YZ_angles(){
 void Barometer_Reading(){
   sensor.read();
   barometer_input = sensor.depth();
-//  Serial.print("Depth: ");             //Use Depth in incompressible liquid only
-//  Serial.print(sensor.depth()); 
-//  Serial.println(" m");
 
-/*                                    //Don't need any of these for sub to run
-Serial.print("Pressure: "); 
-Serial.print(sensor.pressure()); 
-Serial.println(" mbar");
+//Don't need any of these for sub to run
+/* 
+   Serial.print("Depth: ");             //Use Depth in incompressible liquid only
+   Serial.print(sensor.depth()); 
+   Serial.println(" m");
 
-Serial.print("Temperature: "); 
-Serial.print(sensor.temperature()); 
-Serial.println(" deg C");
+   Serial.print("Pressure: "); 
+   Serial.print(sensor.pressure()); 
+   Serial.println(" mbar");
+
+   Serial.print("Temperature: "); 
+   Serial.print(sensor.temperature()); 
+   Serial.println(" deg C");
   
-Serial.print("Altitude: ");         //Use Altitude in air only (very not good data)
-Serial.print(sensor.altitude()); 
-Serial.println(" m above mean sea level");
+   Serial.print("Altitude: ");         //Use Altitude in air only (very not good data)
+   Serial.print(sensor.altitude()); 
+   Serial.println(" m above mean sea level");
 */
 }
 
@@ -182,25 +178,23 @@ void Vertical_Outputs(){
 
 //Takes Error and Chooses which Direction to turn
 void Path_Optimization(){
-  double x = 180.00;
-  double y = -180.00;
+  double half_circle_pos = 180.00;
+  double half_circle_neg = -180.00;
   double Y_angle_error = Y_angle_setpoint - Y_angle_input;
   double Z_angle_error = Z_angle_setpoint - Z_angle_input;
   
-  if (Y_angle_error > x){
+  if (Y_angle_error > half_circle_pos){
     Y_angle_error = Y_angle_error - 360;  }
-  else if (Y_angle_error < y){
+  else if (Y_angle_error < half_circle_neg){
     Y_angle_error = Y_angle_error + 360;  }
   
-  if (Z_angle_error > x){
+  if (Z_angle_error > half_circle_pos){
     Z_angle_error = Z_angle_error - 360;  }
-  else if (Z_angle_error < y){
+  else if (Z_angle_error < half_circle_neg){
     Z_angle_error = Z_angle_error + 360;  }
   
-  Y_angle_RealSetpoint = Y_angle_error;
-  Z_angle_RealSetpoint = Z_angle_error;
-  Y_angle_input = 0.00;
-  Z_angle_input = 0.00;
+  Y_angle_setpoint = Y_angle_error + Y_angle_input;
+  Z_angle_setpoint = Z_angle_error + Z_angle_input;
 }
 
 
