@@ -1,11 +1,10 @@
 /* Robosub 2019-2020 Horizontal Thruster Testing
    
-   Current Revision 11 14 19
-   Feature: IMU for X angle only/ Output for Horizontal only
+   Current Revision 11 14 19:
+      Only Horizontal Thrusters React
    
-   Aren Petrossian
+   All values with "//****"  can be personalized
 */
-
 
 
 //All librarys and IMU setup
@@ -30,7 +29,7 @@ int right_thruster_pin = 10;        //****
 
 //Start all PIDs and set k values**
 double distance_input, distance_output, distance_setpoint;
-double angle_input, angle_output, angle_setpoint, angle_RealSetpoint;
+double angle_input, angle_output, angle_setpoint;
 
 double distance_kP = 1;            //****
 double distance_kI = 0;            //****
@@ -41,7 +40,7 @@ double angle_kD = 4;               //****
 
 PID distance_PID  (&distance_input, &distance_output, &distance_setpoint,
                    distance_kP, distance_kI, distance_kD, DIRECT);
-PID angle_PID     (&angle_input, &angle_output, &angle_RealSetpoint,
+PID angle_PID     (&angle_input, &angle_output, &angle_setpoint,
                    angle_kP, angle_kI, angle_kD, DIRECT);
 
 
@@ -59,8 +58,8 @@ void setup(){
   
   distance_input = 0;                      //The distance input will always be 0
   
-  distance_setpoint = 0;                   //****        changes based on cv and nav
-  angle_setpoint = 0;                      //****        changes based on cv and nav
+  distance_setpoint = 0;                   //****
+  angle_setpoint = 0;                      //****
   delay(6000);
 }
 
@@ -77,7 +76,6 @@ void loop(){
 //Turns IMU data collecting on
 void InitializeIMU(){
   Wire.begin();
-  //Wire.beginTransmission(0x28);  //don't need for now but will need when we have > 1 sensor
   if(!bno.begin()) {
     /* There was a problem detecting the BNO055 ... check your connections */
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
@@ -117,16 +115,17 @@ void Horizontal_Outputs(){
 
 //Takes Error and Chooses which Direction to turn
 void Path_Optimization(){
-  double x = 180.00;
-  double y = -180.00;
+  double half_circle_pos = 180.00;
+  double half_circle_neg = -180.00;
   double angle_error = angle_setpoint - angle_input;
-  if (angle_error > x){
-    angle_error = angle_error - 360;  }
-  else if (angle_error < y){
-    angle_error = angle_error + 360;  }
+  if (angle_error > half_circle_pos){
+    angle_error = angle_error - 360;  
+  }
+  else if (angle_error < half_circle_neg){
+    angle_error = angle_error + 360;  
+  }
     
-  angle_RealSetpoint = angle_error;
-  angle_input = 0.00;
+  angle_setpoint = angle_error + angle_input;
 }
 
 
@@ -134,5 +133,5 @@ void Path_Optimization(){
 //Takes PID outputs and makes pwm for Thrusters
 void mixer(){
     final_left_thruster_value = 1500 + distance_output + angle_output;
-    final_right_thruster_value = 1500 + distance_output - angle_output;    //could also delete the - angle_output here and only increase other side:
-}                                                                          //.. would need an if statement to set negative angle_output to zero
+    final_right_thruster_value = 1500 + distance_output - angle_output;
+}
