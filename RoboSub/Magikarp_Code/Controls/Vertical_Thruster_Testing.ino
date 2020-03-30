@@ -184,14 +184,18 @@ void Path_Optimization(){
   double Z_angle_error = Z_angle_setpoint - Z_angle_input;
   
   if (Y_angle_error > half_circle_pos){
-    Y_angle_error = Y_angle_error - 360;  }
+    Y_angle_error = Y_angle_error - 360;  
+  }
   else if (Y_angle_error < half_circle_neg){
-    Y_angle_error = Y_angle_error + 360;  }
+    Y_angle_error = Y_angle_error + 360;  
+  }
   
   if (Z_angle_error > half_circle_pos){
-    Z_angle_error = Z_angle_error - 360;  }
+    Z_angle_error = Z_angle_error - 360;  
+  }
   else if (Z_angle_error < half_circle_neg){
-    Z_angle_error = Z_angle_error + 360;  }
+    Z_angle_error = Z_angle_error + 360;  
+  }
   
   Y_angle_setpoint = Y_angle_error + Y_angle_input;
   Z_angle_setpoint = Z_angle_error + Z_angle_input;
