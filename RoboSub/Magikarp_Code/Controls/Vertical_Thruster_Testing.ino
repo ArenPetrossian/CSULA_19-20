@@ -151,7 +151,7 @@ void Barometer_Reading(){
    Serial.print(sensor.temperature()); 
    Serial.println(" deg C");
   
-   Serial.print("Altitude: ");         //Use Altitude in air only (very not good data)
+   Serial.print("Altitude: ");         //Use Altitude in air only (not very good data)
    Serial.print(sensor.altitude()); 
    Serial.println(" m above mean sea level");
 */
