@@ -118,16 +118,16 @@ void InitializeBarometer(){
     delay(2000);
   }
   sensor.setModel(MS5837::MS5837_30BA);
-  sensor.setFluidDensity(997);      //(freshwater ~ 997, seawater ~ 1029)
-}
+  sensor.setFluidDensity(997);      //(air ~ 1.23, freshwater ~ 997, seawater ~1029)
+}                                   //air is not accurate
 
 
 
 //Gets the Y and Z angles from the IMU
 void IMU_YZ_angles(){
     imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-    Y_angle_input = euler.z();  // our y is roll
-    Z_angle_input = euler.y();  // our z is pitch
+    Y_angle_input = euler.z();  // our Y is roll
+    Z_angle_input = euler.y();  // our Z is pitch
 }
 
 
