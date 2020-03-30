@@ -22,6 +22,7 @@ void loop() {
 
 void Initialize_IMU(){
   Wire.begin();                //begin the wire communication
+  //Wire.beginTransmission(0x28); //don't need for now but will need when we have > 1 sensor
   Serial.begin(9600);
   /* Initialise the IMU */
   if(!bno.begin()) {
@@ -34,7 +35,6 @@ void Initialize_IMU(){
 
 
 void IMU_Data_Values(){
-//    Wire.beginTransmission(0x28); //don't need for now but will need when we have > 1 sensor
    imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
    x_angle = euler.x();    // our X is yaw
    y_angle = euler.z();    // our Y is roll
