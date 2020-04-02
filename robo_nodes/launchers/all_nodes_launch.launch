@@ -1,0 +1,15 @@
+<launch>
+
+	<node pkg="robo_nodes" type="nav.py" name="NAV" />
+
+	<node pkg="robo_nodes" type="cv.py" name="CV" />
+
+	<node pkg="robo_nodes" type="controls.py" name="CONTROLS" />
+
+	<node pkg="robo_nodes" type="weapons.py" name="WEAPONS" />
+
+	<node pkg="robo_nodes" type="framehull.py" name="FRAMEHULL" />
+
+        <node pkg="robo_nodes" type="smach.py" name="SMACH" />
+
+</launch>
