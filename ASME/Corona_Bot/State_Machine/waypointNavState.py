@@ -7,7 +7,7 @@ import time
 import math
 from ros_nodes.msg import sensors2smach
 from ros_nodes.msg import smach2controls
-from btest import Subscribe_to
+from Subscriber import Subscribe_to
 
 class Waypoint_Navigation(smach.State):
 	def __init__(self):
